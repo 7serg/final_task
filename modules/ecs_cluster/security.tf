@@ -1,6 +1,7 @@
 #Security group for load balancer
 
 resource "aws_security_group" "alb" {
+  name = "${var.env}-${var.app_name}-lb_sg"
 
   description = "comtrols connection to alb"
   vpc_id      = aws_vpc.demoecs_vpc.id
@@ -29,6 +30,7 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_security_group" "bastion" {
+  name = "${var.env}-${var.app_name}-bastion_sg"
 
   description = "controll connections from bastion servers"
   vpc_id      = aws_vpc.demoecs_vpc.id
@@ -102,20 +104,20 @@ resource "aws_security_group" "webserver" {
   }
 
   tags = {
-    Name = "webserver-sg"
+    Name = "${var.env}-${var.app_name}-webservers_sg"
   }
 }
 
 
 #Security group ecs service
 resource "aws_security_group" "app_security_group" {
-  name        = "${var.ecs_service_name}-SG"
+  name        = "${var.ecs_service_name}-${var.env}-${var.app_name}-SG"
   description = "Security group for our application"
   vpc_id      = aws_vpc.demoecs_vpc.id
 
   ingress {
-    from_port       = 80
-    to_port         = 80
+    from_port       = var.app_port
+    to_port         = var.app_port
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
 
@@ -128,4 +130,5 @@ resource "aws_security_group" "app_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
 
   }
+  depends_on = [aws_security_group.alb]
 }

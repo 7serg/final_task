@@ -40,7 +40,7 @@ variable "public_subnets_cidr" {
   description = "Public subnets"
   default = [
     "10.10.11.0/24",
-    "10.10.12.0/24"
+    #  "10.10.12.0/24"
   ]
 
 }
@@ -50,7 +50,7 @@ variable "private_subnets_cidr" {
   description = "Private subnets cidr"
   default = [
     "10.10.20.0/24",
-    "10.10.21.0/24"
+    #  "10.10.21.0/24"
   ]
 }
 
@@ -70,10 +70,9 @@ variable "task_definition_name" {
   default = "nginxtask"
 }
 
-variable "ecs_service_name" {
-  type    = string
-  default = "test"
-}
+#variable "ecs_service_name" {
+#  type = string
+#}
 
 variable "docker_image_url" {
   type    = string
@@ -104,6 +103,7 @@ variable "ecr_repository_url" {
   default = "182009040698.dkr.ecr.eu-central-1.amazonaws.com/nginx-test:latest"
 }
 */
+
 #defines how many tasks to run
 variable "app_count" {
   default = 2

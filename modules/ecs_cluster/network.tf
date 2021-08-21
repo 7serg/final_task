@@ -15,6 +15,8 @@ terraform {
   }
 }
 
+
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -23,7 +25,7 @@ data "aws_availability_zones" "available" {
 resource "aws_vpc" "demoecs_vpc" {
   cidr_block = var.vpc_cidr
   tags = {
-    Name = "${var.env}-VPC"
+    Name = "${var.env}-${var.app_name}-VPC"
   }
 }
 
@@ -35,7 +37,7 @@ resource "aws_vpc" "demoecs_vpc" {
 resource "aws_internet_gateway" "demoecs" {
   vpc_id = aws_vpc.demoecs_vpc.id
   tags = {
-    Name = "${var.env} - igw"
+    Name = "${var.env}-${var.app_name}-igw"
   }
 }
 
@@ -49,7 +51,7 @@ resource "aws_subnet" "public_subnets" {
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
   tags = {
-    Name = "public_subnet-${var.env}-${count.index + 1}"
+    Name = "public_subnet-${var.env}-${var.app_name}-${count.index + 1}"
   }
 
 }
@@ -65,7 +67,7 @@ resource "aws_route_table" "public_subnets" {
 
   }
   tags = {
-    Name = "${var.env}-public-route-table"
+    Name = "${var.env}-${var.app_name}-public-route-table"
   }
 
   depends_on = [aws_internet_gateway.demoecs]
@@ -89,7 +91,7 @@ resource "aws_subnet" "private_subnets" {
   cidr_block        = element(var.private_subnets_cidr, count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
-    Name = "private_subnet ${var.env} ${count.index + 1}"
+    Name = "${var.env}-${var.app_name}-${count.index + 1}-private-subnet"
   }
 
 }
@@ -98,6 +100,9 @@ resource "aws_subnet" "private_subnets" {
 resource "aws_eip" "elastic_ip_for_nat" {
   count = length(var.private_subnets_cidr)
   vpc   = true
+  tags = {
+    Name = "${var.env}-${var.app_name}-${count.index + 1}-EIP"
+  }
 
 }
 
@@ -109,7 +114,7 @@ resource "aws_nat_gateway" "for_private_subnets" {
   allocation_id = element(aws_eip.elastic_ip_for_nat[*].id, count.index)
   subnet_id     = element(aws_subnet.public_subnets[*].id, count.index)
   tags = {
-    Name = "Nat_gateway in ${data.aws_availability_zones.available.names[count.index]} ${count.index + 1}"
+    Name = "Nat_gw-${data.aws_availability_zones.available.names[count.index]}-${count.index + 1}-${var.env}-${var.app_name}"
   }
   depends_on = [aws_eip.elastic_ip_for_nat]
 
@@ -124,7 +129,7 @@ resource "aws_route_table" "private" {
     gateway_id = aws_nat_gateway.for_private_subnets[count.index].id
   }
   tags = {
-    Name = "Routing table ${data.aws_availability_zones.available.names[count.index]} ${count.index + 1}"
+    Name = "RT-${data.aws_availability_zones.available.names[count.index]}-${count.index + 1}-${var.env}-${var.app_name}"
   }
 
 }

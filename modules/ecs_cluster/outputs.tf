@@ -65,6 +65,10 @@ output "aws_lb_id" {
   value = aws_lb.ecs_cluster_alb.id
 }
 
+output "aws_lb_dns" {
+  value = aws_lb.ecs_cluster_alb.dns_name
+}
+
 output "aws_lb_target_group_id" {
   value = aws_lb_target_group.ecs_cluster_alb.id
 }
@@ -110,5 +114,5 @@ output "fargate_iam_role_policy_id" {
 
 
 output "ecs_task_definition_arn" {
-  value = aws_ecs_task_definition.test-nginx.arn
+  value = aws_ecs_task_definition.app.arn
 }
